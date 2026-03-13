@@ -1,0 +1,20 @@
+ChatVia End User License Agreement
+
+Copyright (c) 2025 ChatVia. All rights reserved.
+
+1. LICENSE GRANT
+You are granted a non-exclusive, non-transferable license to use ChatVia for personal or commercial use.
+
+2. RESTRICTIONS
+You may not:
+- Redistribute the software without permission
+- Modify, reverse engineer, or decompile the software
+- Remove any copyright or proprietary notices
+
+3. DISCLAIMER
+This software is provided "as is" without warranty of any kind. The authors shall not be liable for any damages.
+
+4. TERMINATION
+This license is effective until terminated. Your rights will terminate automatically if you fail to comply with any term.
+
+By clicking "I Accept" or installing ChatVia, you agree to be bound by this license.

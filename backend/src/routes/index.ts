@@ -1,0 +1,29 @@
+import { Router } from "express";
+import authRoutes from "./authRoutes.js";
+import userRoutes from "./userRoutes.js";
+import conversationRoutes from "./conversationRoutes.js";
+import messageRoutes from "./messageRoutes.js";
+import messageReadRoutes from "./messageReadRoutes.js";
+import groupRoutes from "./groupRoutes.js";
+import groupMemberRoutes from "./groupMemberRoutes.js";
+import groupMessageRoutes from "./groupMessageRoutes.js";
+import uploadRoutes from "./uploadRoutes.js";
+import callRoutes from "./callRoutes.js";
+import statusRoutes from "./statusRoutes.js";
+import settingsRoutes from "./settingsRoutes.js";
+
+const router = Router();
+router.use("/login", authRoutes);
+router.use("/users", userRoutes);
+router.use("/conversations", conversationRoutes);
+router.use("/messages", messageRoutes);
+router.use("/message-reads", messageReadRoutes);
+router.use("/group-messages", groupMessageRoutes);
+router.use("/group-members", groupMemberRoutes);
+router.use("/groups", groupRoutes);
+router.use("/upload", uploadRoutes);
+router.use("/calls", callRoutes);
+router.use("/status", statusRoutes);
+router.use("/settings", settingsRoutes);
+
+export default router;
