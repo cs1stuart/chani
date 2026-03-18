@@ -56,9 +56,12 @@ export async function getUsersForViewer(viewerId: string): Promise<UserListItem[
   return filtered.map((u: Record<string, unknown>) => {
     const id = toId(u._id);
     const privacy = privacyMap.get(id) || { last_seen: "everyone", profile_photo: "everyone", about: "everyone" };
-    const showLastSeen = canShowToViewer(privacy.last_seen!, viewerId, id, contactPartnerIds);
-    const showPhoto = canShowToViewer(privacy.profile_photo!, viewerId, id, contactPartnerIds);
-    const showAbout = canShowToViewer(privacy.about!, viewerId, id, contactPartnerIds);
+    const lastSeen = (privacy.last_seen ?? "everyone") as "everyone" | "contacts" | "nobody";
+    const profilePhoto = (privacy.profile_photo ?? "everyone") as "everyone" | "contacts" | "nobody";
+    const about = (privacy.about ?? "everyone") as "everyone" | "contacts" | "nobody";
+    const showLastSeen = canShowToViewer(lastSeen, viewerId, id, contactPartnerIds);
+    const showPhoto = canShowToViewer(profilePhoto, viewerId, id, contactPartnerIds);
+    const showAbout = canShowToViewer(about, viewerId, id, contactPartnerIds);
 
     return {
       id,

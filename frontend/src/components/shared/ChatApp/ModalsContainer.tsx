@@ -65,7 +65,7 @@ export interface ModalsContainerProps {
   showForwardModal: boolean;
   selectedMsgCount: number;
   forwardTargets: string[];
-  setForwardTargets: (ids: string[]) => void;
+  setForwardTargets: React.Dispatch<React.SetStateAction<string[]>>;
   groups: Group[];
   onCloseForwardModal: () => void;
   onForwardSend: () => void;

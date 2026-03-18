@@ -1159,11 +1159,7 @@ export default function ChatApp() {
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
     const status = call?.status ?? null;
-    const isGroupCall = Boolean(call?.isGroupCall);
-    const shouldRunTimer =
-      status === "connected" ||
-      (isGroupCall && status === "calling");
-    if (shouldRunTimer) {
+    if (status === "connected") {
       interval = setInterval(() => setCallDuration((prev) => prev + 1), 1000);
     } else {
       setCallDuration(0);
@@ -1573,7 +1569,7 @@ export default function ChatApp() {
         groupCallRef.current = { groupId: groupData.id };
         setGroupCallParticipantIds([currentUser.id]);
         setCallAccepted(true);
-        setCall((p: any) => (p ? { ...p, status: "connected" } : null));
+        // Keep "calling" until someone joins - status becomes "connected" on group_call_participant_joined
         socketRef.current?.emit("start_group_call", {
           groupId: groupData.id,
           type,

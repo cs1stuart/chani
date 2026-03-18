@@ -31,7 +31,7 @@ export interface GroupMemberItem {
 export async function getGroupsByUserId(userId: string): Promise<GroupListItem[]> {
   const uid = new mongoose.Types.ObjectId(userId);
   const memberships = await MessageGroupMember.find({ user_id: uid }).lean();
-  const groupIds = memberships.map((m: { group_id: unknown }) => m.group_id);
+  const groupIds = memberships.map((m) => m.group_id).filter(Boolean);
 
   // Exclude call-only groups (add-to-1:1) and legacy "Group Call" - they shouldn't appear in chat list
   const groups = await MessageGroup.find({

@@ -1,0 +1,103 @@
+{
+  "name": "chatvia-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ChatVia - Desktop Chat Application",
+  "author": "ChatVia",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "electron": "npx electron .",
+    "electron:dev": "npx concurrently \"next dev\" \"wait-on http://localhost:3000 && cross-env ELECTRON_DEV=true npx electron .\"",
+    "build:icons": "node scripts/build-icons.js",
+    "electron:build": "npm run build:icons && next build && npx electron-builder",
+    "electron:build:win": "npm run build:icons && next build && npx electron-builder --win",
+    "electron:build:mac": "npm run build:icons && next build && npx electron-builder --mac",
+    "electron:build:linux": "npm run build:icons && next build && npx electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.chatvia.app",
+    "productName": "ChatVia",
+    "electronVersion": "33.2.0",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      ".next/standalone/**/*",
+      ".next/static/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "electron/icon.ico",
+      "uninstallerIcon": "electron/icon.ico",
+      "installerHeaderIcon": "electron/icon.ico",
+      "license": "LICENSE.txt",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "electron/icon.png",
+      "category": "public.app-category.social-networking"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "electron/icon.png"
+    }
+  },
+  "dependencies": {
+    "@google/genai": "^1.29.0",
+    "buffer": "^6.0.3",
+    "canvas-confetti": "^1.9.4",
+    "emoji-picker-react": "^4.18.0",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-easy-crop": "^5.5.6",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/simple-peer": "^9.11.9",
+    "@types/socket.io": "^3.0.1",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "33.2.0",
+    "electron-builder": "^25.1.8",
+    "postcss": "^8.4.49",
+    "sharp": "^0.33.5",
+    "tailwindcss": "^3.4.16",
+    "to-ico": "^1.1.5",
+    "typescript": "~5.8.2",
+    "wait-on": "^8.0.1"
+  }
+}

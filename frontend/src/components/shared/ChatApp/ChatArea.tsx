@@ -127,7 +127,7 @@ export default function ChatArea({
         chatSearchQuery={chatSearchQuery}
         showChatMenu={showChatMenu}
         onExitSelectMode={onExitSelectMode}
-        onCopy={onCopySelected}
+        onCopy={onCopySelected ?? onCopy ?? (() => {})}
         onDelete={onDeleteSelected}
         onForward={onForward}
         onOpenInfo={onOpenInfo}

@@ -36,7 +36,7 @@ export interface AppLayoutProps {
   groupName: string;
   setGroupName: (v: string) => void;
   selectedMembers: string[];
-  setSelectedMembers: (v: string[]) => void;
+  setSelectedMembers: React.Dispatch<React.SetStateAction<string[]>>;
   onCreateGroup: () => Promise<void>;
   // Profile
   showProfileSettings: boolean;

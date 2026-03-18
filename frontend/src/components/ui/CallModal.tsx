@@ -181,27 +181,27 @@ export default function CallModal({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-lg font-bold text-white/80">
+                    <span className="text-lg font-bold text-white">
                       {(call.groupName || call.name)[0]}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium truncate">{call.groupName || call.name}</p>
-                  <p className="text-sm text-white/60 font-mono">{formatCallTime(callDuration)}</p>
+                  <p className="font-medium truncate text-gray-800">{call.groupName || call.name}</p>
+                  <p className="text-sm text-gray-500 font-mono">{formatCallTime(callDuration)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={onToggleMute}
-                  className={`p-2 rounded-full transition-colors ${isMuted ? "bg-[#E53935] text-white" : "hover:bg-white/10 text-white/80"}`}
+                  className={`p-2 rounded-full transition-colors ${isMuted ? "bg-[#E53935] text-white" : "hover:bg-gray-100 text-gray-600"}`}
                   title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted ? <MicOff size={18} /> : <Mic size={18} />}
                 </button>
                 <button
                   onClick={onToggleVideo}
-                  className={`p-2 rounded-full transition-colors ${isVideoOff ? "bg-[#E53935] text-white" : "hover:bg-white/10 text-white/80"}`}
+                  className={`p-2 rounded-full transition-colors ${isVideoOff ? "bg-[#E53935] text-white" : "hover:bg-gray-100 text-gray-600"}`}
                   title={isVideoOff ? "Turn on camera" : "Turn off camera"}
                 >
                   {isVideoOff ? <VideoOff size={18} /> : <Video size={18} />}
@@ -213,22 +213,22 @@ export default function CallModal({
                         if (showInvitePicker) setSelectedToAdd1_1(new Set());
                         setShowInvitePicker((v) => !v);
                       }}
-                      className="p-2 rounded-full hover:bg-white/10 text-white/80 transition-colors"
+                      className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
                       title="Add participant"
                     >
                       <UserPlus size={18} />
                     </button>
                     {showInvitePicker && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 max-h-48 overflow-y-auto bg-[#1a1a1d] border border-white/10 rounded-xl shadow-2xl py-2 z-[110]">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-2xl py-2 z-[110]">
                         {isGroupCall
                           ? membersToInvite.map((m) => (
                               <button
                                 key={m.id}
                                 onClick={() => onInviteToCall?.(m.id)}
-                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-white/10 text-left"
+                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-100 text-left"
                               >
                                 <img src={m.avatar} alt={m.username} className="w-8 h-8 rounded-full object-cover" />
-                                <span className="text-white truncate">{m.username}</span>
+                                <span className="text-gray-900 truncate">{m.username}</span>
                               </button>
                             ))
                           : (
@@ -244,13 +244,13 @@ export default function CallModal({
                                         return next;
                                       });
                                     }}
-                                    className="w-full px-4 py-2 flex items-center gap-3 hover:bg-white/10 text-left"
+                                    className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-100 text-left"
                                   >
-                                    <span className="flex-shrink-0 w-4 h-4 rounded border-2 border-white/50 flex items-center justify-center">
+                                    <span className="flex-shrink-0 w-4 h-4 rounded border-2 border-gray-400 flex items-center justify-center">
                                       {selectedToAdd1_1.has(m.id) && <span className="w-2 h-2 rounded-full bg-[#00a884]" />}
                                     </span>
                                     <img src={m.avatar} alt={m.username} className="w-8 h-8 rounded-full object-cover" />
-                                    <span className="text-white truncate">{m.username}</span>
+                                    <span className="text-gray-900 truncate">{m.username}</span>
                                   </button>
                                 ))}
                                 {selectedToAdd1_1.size > 0 && (
@@ -268,7 +268,7 @@ export default function CallModal({
                               </>
                             )}
                         {(isGroupCall ? membersToInvite.length === 0 : usersToAddIn1_1.length === 0) && (
-                          <p className="px-4 py-3 text-white/60 text-sm">No one to add</p>
+                          <p className="px-4 py-3 text-gray-500 text-sm">No one to add</p>
                         )}
                       </div>
                     )}
@@ -277,7 +277,7 @@ export default function CallModal({
                 {onExpandCall && (
                   <button
                     onClick={onExpandCall}
-                    className="p-2 rounded-full hover:bg-white/10 text-white/80 transition-colors"
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
                     title="Expand call"
                   >
                     <Maximize2 size={18} />
@@ -300,11 +300,11 @@ export default function CallModal({
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-[#f0f2f5] z-[100] flex flex-col items-center justify-between text-gray-900 p-8"
             >
-          <div className="w-full flex justify-between items-center opacity-40">
+          <div className="w-full flex justify-between items-center opacity-50">
             <div className="flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-white/50" />
-              <div className="w-2 h-2 rounded-full bg-white/50" />
-              <div className="w-2 h-2 rounded-full bg-white/50" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
             </div>
           </div>
 
@@ -329,7 +329,7 @@ export default function CallModal({
                   return (
                     <div
                       key={userId}
-                      className="relative min-w-0 min-h-[160px] rounded-xl sm:rounded-2xl overflow-hidden bg-gray-900 border-2 border-white/10 shadow-xl flex items-center justify-center"
+                      className="relative min-w-0 min-h-[160px] rounded-xl sm:rounded-2xl overflow-hidden bg-gray-800 border-2 border-gray-300 shadow-xl flex items-center justify-center"
                     >
                       <span className="absolute top-2 left-2 z-10 text-xs font-semibold text-white/95 bg-black/60 px-2 py-1 rounded truncate max-w-[85%]">
                         {isMe ? "You" : info.username}
@@ -377,8 +377,14 @@ export default function CallModal({
                   );
                 })}
               </div>
-              <h2 className="text-xl sm:text-2xl font-medium mt-3 flex-shrink-0">{call.groupName || call.name}</h2>
-              <p className="text-white/60 font-mono text-sm sm:text-base flex-shrink-0">{formatCallTime(callDuration)}</p>
+              <h2 className="text-xl sm:text-2xl font-medium mt-3 flex-shrink-0 text-gray-800">{call.groupName || call.name}</h2>
+              <p className="text-gray-600 font-mono text-sm sm:text-base flex-shrink-0">
+                {call.status === "connected"
+                  ? formatCallTime(callDuration)
+                  : call.status === "ringing"
+                    ? "Ringing..."
+                    : "Calling..."}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col items-center flex-1 justify-center">
@@ -403,8 +409,8 @@ export default function CallModal({
                   </div>
                 )}
               </div>
-              <h2 className="text-4xl font-medium mb-1 tracking-tight">{call.name}</h2>
-              <p className="text-white/60 text-xl font-mono">
+              <h2 className="text-4xl font-medium mb-1 tracking-tight text-gray-800">{call.name}</h2>
+              <p className="text-gray-600 text-xl font-mono">
                 {call.status === "connected"
                   ? formatCallTime(callDuration)
                   : call.name.includes("(Call Ended)")
@@ -426,7 +432,7 @@ export default function CallModal({
                   >
                     <Phone size={28} />
                   </button>
-                  <span className="text-xs font-medium text-white/70">Accept</span>
+                  <span className="text-xs font-medium text-gray-600">Accept</span>
                 </div>
                 <div className="flex flex-col items-center gap-3">
                   <button
@@ -435,23 +441,33 @@ export default function CallModal({
                   >
                     <X size={28} />
                   </button>
-                  <span className="text-xs font-medium text-white/70">Decline</span>
+                  <span className="text-xs font-medium text-gray-600">Decline</span>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 bg-white/5 backdrop-blur-xl p-4 rounded-3xl border border-white/10">
-                <button className="p-4 hover:bg-white/10 rounded-full transition-colors text-white/80">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 bg-white/95 backdrop-blur-xl p-4 rounded-3xl border border-gray-200 shadow-xl">
+                <button className="p-4 hover:bg-gray-100 rounded-full transition-colors text-gray-700">
                   <MoreVertical size={24} />
                 </button>
                 <button
                   onClick={onToggleMute}
-                  className={`p-4 rounded-full transition-colors ${isMuted ? "bg-[#E53935] text-white" : "hover:bg-white/10 text-white/80"}`}
+                  className={`p-4 rounded-full transition-colors ${isMuted ? "bg-[#E53935] text-white" : "hover:bg-gray-100 text-gray-700"}`}
+                  title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
                 </button>
+                {call.type === "video" && (
+                  <button
+                    onClick={onToggleVideo}
+                    className={`p-4 rounded-full transition-colors ${isVideoOff ? "bg-[#E53935] text-white" : "hover:bg-gray-100 text-gray-700"}`}
+                    title={isVideoOff ? "Turn on camera" : "Turn off camera"}
+                  >
+                    {isVideoOff ? <VideoOff size={24} /> : <Video size={24} />}
+                  </button>
+                )}
                 <button
                   onClick={() => onOpenChat?.()}
-                  className="p-4 hover:bg-white/10 rounded-full transition-colors text-white/80"
+                  className="p-4 hover:bg-gray-100 rounded-full transition-colors text-gray-700"
                   title="Open chat"
                 >
                   <MessageSquare size={24} />
@@ -460,13 +476,13 @@ export default function CallModal({
                   <div className="relative">
                     <button
                       onClick={() => setShowInvitePicker((v) => !v)}
-                      className="p-4 hover:bg-white/10 rounded-full transition-colors text-white/80"
+                      className="p-4 hover:bg-gray-100 rounded-full transition-colors text-gray-700"
                       title="Add participant"
                     >
                       <UserPlus size={24} />
                     </button>
                     {showInvitePicker && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 max-h-48 overflow-y-auto bg-[#1a1a1d] border border-white/10 rounded-xl shadow-2xl py-2 z-[110]">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-2xl py-2 z-[110]">
                         {isGroupCall
                           ? membersToInvite.map((m) => (
                               <button
@@ -475,10 +491,10 @@ export default function CallModal({
                                   onInviteToCall?.(m.id);
                                   // Keep picker open so user can add more participants
                                 }}
-                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-white/10 text-left"
+                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-100 text-left"
                               >
                                 <img src={m.avatar} alt={m.username} className="w-8 h-8 rounded-full object-cover" />
-                                <span className="text-white truncate">{m.username}</span>
+                                <span className="text-gray-900 truncate">{m.username}</span>
                               </button>
                             ))
                           : usersToAddIn1_1.map((m) => (
@@ -488,14 +504,14 @@ export default function CallModal({
                                   onAddTo1_1Call?.(m.id);
                                   // Keep picker open so user can add more (1:1 converts after first add)
                                 }}
-                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-white/10 text-left"
+                                className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-100 text-left"
                               >
                                 <img src={m.avatar} alt={m.username} className="w-8 h-8 rounded-full object-cover" />
-                                <span className="text-white truncate">{m.username}</span>
+                                <span className="text-gray-900 truncate">{m.username}</span>
                               </button>
                             ))}
                         {(isGroupCall ? membersToInvite.length : usersToAddIn1_1.length) === 0 && (
-                          <p className="px-4 py-3 text-white/60 text-sm">No one to add</p>
+                          <p className="px-4 py-3 text-gray-500 text-sm">No one to add</p>
                         )}
                       </div>
                     )}
@@ -504,7 +520,7 @@ export default function CallModal({
                 {onToggleRecording && (
                   <button
                     onClick={onToggleRecording}
-                    className={`p-4 rounded-full transition-colors ${isRecording ? "bg-[#E53935] text-white" : "hover:bg-white/10 text-white/80"}`}
+                    className={`p-4 rounded-full transition-colors ${isRecording ? "bg-[#E53935] text-white" : "hover:bg-gray-100 text-gray-700"}`}
                     title={isRecording ? "Stop recording" : "Record call"}
                   >
                     {isRecording ? <Square size={24} fill="currentColor" /> : <Circle size={24} />}
@@ -513,7 +529,7 @@ export default function CallModal({
                 {call.type === "video" && onToggleScreenShare && (
                   <button
                     onClick={onToggleScreenShare}
-                    className={`p-4 rounded-full transition-colors ${isScreenSharing ? "bg-[#4CAF50] text-white" : "hover:bg-white/10 text-white/80"}`}
+                    className={`p-4 rounded-full transition-colors ${isScreenSharing ? "bg-[#4CAF50] text-white" : "hover:bg-gray-100 text-gray-700"}`}
                     title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
                   >
                     {isScreenSharing ? <MonitorOff size={24} /> : <Monitor size={24} />}
@@ -525,18 +541,12 @@ export default function CallModal({
                 >
                   <Phone size={32} className="rotate-[135deg]" />
                 </button>
-                <button
-                  onClick={onToggleVideo}
-                  className={`p-4 rounded-full transition-colors ${isVideoOff ? "bg-[#E53935] text-white" : "hover:bg-white/10 text-white/80"}`}
-                >
-                  {isVideoOff ? <VideoOff size={24} /> : <Video size={24} />}
-                </button>
               </div>
             )}
           </div>
 
           {stream && call.type === "video" && (!isVideoOff || isScreenSharing) && !isGroupCall && (
-            <div className="absolute bottom-32 right-8 w-48 h-32 bg-gray-900 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl">
+            <div className="absolute bottom-32 right-8 w-48 h-32 bg-gray-800 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-2xl">
               <video
                 playsInline
                 muted
