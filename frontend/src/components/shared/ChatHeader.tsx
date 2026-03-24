@@ -53,7 +53,7 @@ export default function ChatHeader(props: Props) {
   }
 
   return (
-    <div className="p-3 bg-[#f0f2f5] border-b border-gray-200 flex items-center justify-between z-10 relative">
+    <div className="p-3 bg-[#f0f2f5] border-b border-gray-200 flex   justify-between z-10 relative">
       <div className="flex items-center gap-3 cursor-pointer" onClick={onOpenInfo}>
         <img src={selectedChat.data.avatar} alt={selectedChat.type === "user" ? (selectedChat.data as User).username : (selectedChat.data as Group).name} className="w-10 h-10 rounded-full object-cover object-center bg-gray-200" />
         <div>
