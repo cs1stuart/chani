@@ -11,7 +11,11 @@ export function auth(req: AuthRequest, res: Response, next: NextFunction): void 
     return;
   }
   try {
-    const decoded = jwt.verify(header.split(" ")[1], JWT_SECRET) as { id: string; email: string };
+    const decoded = jwt.verify(header.split(" ")[1], JWT_SECRET) as {
+      id: string;
+      email: string;
+      role?: "admin" | "employee";
+    };
     req.user = decoded;
     next();
   } catch {

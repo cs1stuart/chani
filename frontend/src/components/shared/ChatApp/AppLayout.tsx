@@ -62,6 +62,8 @@ export interface AppLayoutProps {
   onOpenSettings: () => void;
   showSettings: boolean;
   onCloseSettings: () => void;
+  isAdmin: boolean;
+  onOpenAdminDashboard: () => void;
   children: React.ReactNode;
 }
 
@@ -108,6 +110,8 @@ export default function AppLayout({
   onOpenSettings,
   showSettings,
   onCloseSettings,
+  isAdmin,
+  onOpenAdminDashboard,
   children,
 }: AppLayoutProps) {
   return (
@@ -158,6 +162,8 @@ export default function AppLayout({
         onOpenSettings={onOpenSettings}
         showSettings={showSettings}
         onCloseSettings={onCloseSettings}
+        isAdmin={isAdmin}
+        onOpenAdminDashboard={onOpenAdminDashboard}
       />
       {children}
     </div>

@@ -12,6 +12,9 @@
 # production
 /build
 frontend/dist
+frontend/.next
+**/.next
+*.tsbuildinfo
 dist
 backend/uploads
 uploads

@@ -15,15 +15,33 @@ import {
   showNotification,
   setDocumentTitle,
 } from "@/lib/notifications";
+import {
+  mergeNotificationPrefs,
+  playIncomingMessageSound,
+  startIncomingCallRingtone,
+  stopIncomingCallRingtone,
+  type NotificationPrefs,
+  persistNotificationPrefsForPlayback,
+  readNotificationPrefsForPlayback,
+  clearNotificationPrefsStorage,
+} from "@/lib/notificationSounds";
 import { formatMessagePreview } from "@/lib/utils";
 
 export default function ChatApp() {
   const { showToast } = useToast();
+  const showToastRef = useRef(showToast);
+  showToastRef.current = showToast;
   const backendUrl = typeof window !== "undefined" ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002") : "";
   // ── Auth State ──
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("workchat_user");
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      const u = JSON.parse(saved) as User;
+      return { ...u, role: u.role === "admin" ? "admin" : "employee" };
+    } catch {
+      return null;
+    }
   });
   const [token, setToken] = useState<string>(
     () => localStorage.getItem("workchat_token") || "",
@@ -70,6 +88,7 @@ export default function ChatApp() {
   const [showAddStatusModal, setShowAddStatusModal] = useState(false);
   const [selectedStatusForView, setSelectedStatusForView] = useState<{ statuses: StatusItem[]; index: number } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [selectedChat, setSelectedChat] = useState<{
     type: "user" | "group";
     data: User | Group;
@@ -180,6 +199,8 @@ export default function ChatApp() {
   callAcceptedRef.current = callAccepted;
   const callLogSentRef = useRef(false);
   const isSwitchingToGroupRef = useRef(false);
+  const notificationPrefsRef = useRef<NotificationPrefs>(mergeNotificationPrefs());
+  const lastUserNotificationPrefsTouchRef = useRef(0);
 
   // ── Helpers ──
   const safeStopTrack = (track: MediaStreamTrack) => {
@@ -217,6 +238,59 @@ export default function ChatApp() {
       },
     });
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+    lastUserNotificationPrefsTouchRef.current = 0;
+    notificationPrefsRef.current = mergeNotificationPrefs();
+    clearNotificationPrefsStorage();
+    persistNotificationPrefsForPlayback(notificationPrefsRef.current);
+
+    const settingsFetchStartedAt = Date.now();
+    (async () => {
+      try {
+        const res = await authFetch("/api/settings");
+        if (!res.ok) return;
+        const data = await res.json();
+        const n = data.notifications;
+        if (n && typeof n === "object") {
+          if (lastUserNotificationPrefsTouchRef.current > settingsFetchStartedAt) {
+            return;
+          }
+          notificationPrefsRef.current = mergeNotificationPrefs(
+            n as Partial<NotificationPrefs>,
+          );
+          persistNotificationPrefsForPlayback(notificationPrefsRef.current);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    const onNs = (e: Event) => {
+      const ce = e as CustomEvent<Partial<NotificationPrefs>>;
+      if (ce.detail && typeof ce.detail === "object") {
+        lastUserNotificationPrefsTouchRef.current = Date.now();
+        notificationPrefsRef.current = mergeNotificationPrefs({
+          ...notificationPrefsRef.current,
+          ...ce.detail,
+        });
+        persistNotificationPrefsForPlayback(notificationPrefsRef.current);
+      }
+    };
+    window.addEventListener("workchat-notifications-changed", onNs);
+    return () => window.removeEventListener("workchat-notifications-changed", onNs);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (call?.isReceivingCall && call.status === "ringing") {
+      startIncomingCallRingtone(
+        readNotificationPrefsForPlayback(notificationPrefsRef.current),
+      );
+      return () => stopIncomingCallRingtone();
+    }
+    stopIncomingCallRingtone();
+  }, [call?.isReceivingCall, call?.status, call?.from, call?.groupId]);
 
   // ── Data Fetching ──
   const fetchUsers = async () => {
@@ -575,6 +649,14 @@ export default function ChatApp() {
       });
 
       socketRef.current.on("new_message", (message: Message) => {
+        if (message.sender_id !== currentUser.id) {
+          playIncomingMessageSound(
+            readNotificationPrefsForPlayback(notificationPrefsRef.current),
+            {
+              isGroup: Boolean(message.group_id),
+            },
+          );
+        }
         const cur = selectedChatRef.current;
         const belongsToOpenChat = cur
           ? message.group_id
@@ -656,7 +738,16 @@ export default function ChatApp() {
           }
         }
 
-        if (typeof document !== "undefined" && document.hidden && !belongsToOpenChat && message.sender_id !== currentUser.id) {
+        const prefs = readNotificationPrefsForPlayback(notificationPrefsRef.current);
+        const allowMsgPopup = message.group_id
+          ? prefs.group_enabled && prefs.message_popup
+          : prefs.messages_enabled && prefs.message_popup;
+        if (
+          typeof document !== "undefined" &&
+          !belongsToOpenChat &&
+          message.sender_id !== currentUser.id &&
+          allowMsgPopup
+        ) {
           const senderName = message.group_id
             ? (message.sender_name || "Someone")
             : (usersRef.current.find((u) => u.id === message.sender_id)?.username ?? "Someone");
@@ -670,10 +761,15 @@ export default function ChatApp() {
                   : message.type === "call"
                     ? "Voice/Video call"
                     : "New message";
-          showNotification(senderName, {
-            body: body.length > 60 ? body.slice(0, 60) + "…" : body,
-            tag: `msg-${message.group_id || message.sender_id}-${Date.now()}`,
-          });
+          const shortBody = body.length > 60 ? body.slice(0, 60) + "…" : body;
+          if (document.hidden) {
+            showNotification(senderName, {
+              body: shortBody,
+              tag: `msg-${message.group_id || message.sender_id}-${Date.now()}`,
+            });
+          } else {
+            showToastRef.current(`${senderName}: ${shortBody}`, "info", 4200);
+          }
         }
       });
 
@@ -766,10 +862,13 @@ export default function ChatApp() {
         socketRef.current?.emit("call_received", { to: from });
         if (typeof document !== "undefined" && document.hidden) {
           setDocumentTitle(`Incoming ${type === "video" ? "video" : "voice"} call - ${callerName}`);
-          showNotification(`Incoming call from ${callerName}`, {
-            body: type === "video" ? "Video call" : "Voice call",
-            tag: "call",
-          });
+          const np = readNotificationPrefsForPlayback(notificationPrefsRef.current);
+          if (np.messages_enabled && np.message_popup) {
+            showNotification(`Incoming call from ${callerName}`, {
+              body: type === "video" ? "Video call" : "Voice call",
+              tag: "call",
+            });
+          }
         }
       });
 
@@ -832,7 +931,13 @@ export default function ChatApp() {
         groupCallRef.current = { groupId };
         if (typeof document !== "undefined" && document.hidden) {
           setDocumentTitle(`Incoming ${type === "video" ? "video" : "voice"} call - ${groupName}`);
-          showNotification(`Incoming ${type} call in ${groupName}`, { body: `From ${callerName}`, tag: "call" });
+          const np = readNotificationPrefsForPlayback(notificationPrefsRef.current);
+          if (np.messages_enabled && np.message_popup) {
+            showNotification(`Incoming ${type} call in ${groupName}`, {
+              body: `From ${callerName}`,
+              tag: "call",
+            });
+          }
         }
       });
 
@@ -1229,7 +1334,11 @@ export default function ChatApp() {
         setLoginError(data.error || "Login failed");
         return;
       }
-      const { token: newToken, ...userData } = data;
+      const { token: newToken, ...rest } = data;
+      const userData: User = {
+        ...rest,
+        role: rest.role === "admin" ? "admin" : "employee",
+      };
       setToken(newToken);
       tokenRef.current = newToken;
       localStorage.setItem("workchat_token", newToken);
@@ -1248,6 +1357,7 @@ export default function ChatApp() {
     localStorage.removeItem("workchat_user");
     setToken("");
     setCurrentUser(null);
+    setShowAdminDashboard(false);
   };
 
   const handleSendMessage = (e?: React.FormEvent) => {
@@ -1742,6 +1852,7 @@ export default function ChatApp() {
   };
 
   const leaveCall = () => {
+    stopIncomingCallRingtone();
     setDocumentTitle("WorkChat");
     const current = callRef.current;
     const isGroupCall = current?.isGroupCall && current?.groupId;
@@ -1813,6 +1924,7 @@ export default function ChatApp() {
   };
 
   const rejectCall = () => {
+    stopIncomingCallRingtone();
     const current = callRef.current;
     if (current) {
       if (!current.isGroupCall) {
@@ -2606,7 +2718,10 @@ export default function ChatApp() {
         selectedChatId={selectedChat?.data.id || null}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-      onSelectChat={(chat) => setSelectedChat(chat)}
+        onSelectChat={(chat) => {
+          setShowAdminDashboard(false);
+          setSelectedChat(chat);
+        }}
         onLogout={handleLogout}
         showNewChat={showNewChat}
         setShowNewChat={setShowNewChat}
@@ -2640,11 +2755,22 @@ export default function ChatApp() {
           setSelectedStatusForView({ statuses: userStatuses, index: idx >= 0 ? idx : 0 });
         }}
         hasUnseenStatus={hasUnseenStatus}
-        onOpenSettings={() => setShowSettings(true)}
+        onOpenSettings={() => {
+          setShowAdminDashboard(false);
+          setShowSettings(true);
+        }}
         showSettings={showSettings}
         onCloseSettings={() => setShowSettings(false)}
+        isAdmin={currentUser.role === "admin"}
+        onOpenAdminDashboard={() => {
+          setShowSettings(false);
+          setShowAdminDashboard(true);
+        }}
     >
       <ChatSection
+        adminDashboardUserId={currentUser.id}
+        showAdminDashboard={showAdminDashboard}
+        onBackFromAdminDashboard={() => setShowAdminDashboard(false)}
         showSettings={showSettings}
         selectedChat={selectedChat}
             currentUser={currentUser}

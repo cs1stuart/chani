@@ -11,7 +11,9 @@ import { MessageDeletion } from "../models/MessageDeletion.js";
 dotenv.config();
 
 const USERS_TO_ADD = [
-  { first_name: "Ali", last_name: "Khan", email: "ali@workchat.com", password: "Ali@123" },
+  { first_name: "Admin", last_name: "User", email: "admin@workchat.com", password: "Admin@123", role: "admin" as const },
+  { first_name: "Manager", last_name: "Admin", email: "manager@workchat.com", password: "Manager@123", role: "admin" as const },
+  { first_name: "Ali", last_name: "Khan", email: "ali@workchat.com", password: "Ali@123", role: "employee" as const },
   { first_name: "Sara", last_name: "Ahmed", email: "sara@workchat.com", password: "Sara@123" },
   { first_name: "Omar", last_name: "Hassan", email: "omar@workchat.com", password: "Omar@123" },
 
@@ -46,14 +48,18 @@ async function seed(): Promise<void> {
   await MessageGroupMember.deleteMany({});
   await MessageGroup.deleteMany({});
 
-  console.log("Adding 3 users (password hashed with bcrypt)...");
+  console.log("Adding users (password hashed with bcrypt)...");
   for (const u of USERS_TO_ADD) {
     const hash = await bcrypt.hash(u.password, 10);
+    const role =
+      "role" in u && (u as { role?: string }).role === "admin" ? "admin" : "employee";
     await User.create({
       first_name: u.first_name,
       last_name: u.last_name,
       email: u.email,
       password: hash,
+      admin_assigned_name: `${u.first_name} ${u.last_name}`.trim(),
+      role,
       about: "Hey there! I am using WorkChat.",
       status: "active",
       chat_status: "offline",

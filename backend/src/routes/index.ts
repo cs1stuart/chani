@@ -11,9 +11,11 @@ import uploadRoutes from "./uploadRoutes.js";
 import callRoutes from "./callRoutes.js";
 import statusRoutes from "./statusRoutes.js";
 import settingsRoutes from "./settingsRoutes.js";
+import adminRoutes from "./adminRoutes.js";
 
 const router = Router();
 router.use("/login", authRoutes);
+router.use("/admin", adminRoutes);
 router.use("/users", userRoutes);
 router.use("/conversations", conversationRoutes);
 router.use("/messages", messageRoutes);

@@ -11,6 +11,7 @@ export interface LoginResult {
   avatar: string;
   about: string;
   token: string;
+  role: "admin" | "employee";
 }
 
 export async function login(email: string, password: string): Promise<LoginResult | null> {
@@ -23,8 +24,21 @@ export async function login(email: string, password: string): Promise<LoginResul
     { _id: user._id },
     { $set: { chat_status: "online", is_online: 1, last_login: new Date(), updatedAt: new Date() } }
   );
-  const u = user as { _id: unknown; email: string; first_name?: string; last_name?: string; image?: string; about?: string };
-  const token = jwt.sign({ id: toId(u._id), email: u.email }, JWT_SECRET, { expiresIn: "24h" });
+  const u = user as {
+    _id: unknown;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    image?: string;
+    about?: string;
+    role?: string;
+  };
+  const role: "admin" | "employee" = u.role === "admin" ? "admin" : "employee";
+  const token = jwt.sign(
+    { id: toId(u._id), email: u.email, role },
+    JWT_SECRET,
+    { expiresIn: "24h" },
+  );
   const username = `${u.first_name || ""} ${u.last_name || ""}`.trim();
   return {
     id: toId(u._id),
@@ -32,5 +46,6 @@ export async function login(email: string, password: string): Promise<LoginResul
     avatar: getAvatar(u.image || null, u.first_name || "User"),
     about: u.about || "Hey there! I am using WorkChat.",
     token,
+    role,
   };
 }

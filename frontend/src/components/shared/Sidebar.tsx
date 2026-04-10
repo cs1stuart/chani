@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, LogOut, Plus, Users, ArrowLeft, X, MessageCircle, Phone, Circle, Settings, Video, Image, Film, Mic, File as FileIcon } from "lucide-react";
+import { Search, LogOut, Plus, Users, ArrowLeft, X, MessageCircle, Phone, Circle, Settings, Video, Image, Film, Mic, File as FileIcon, LayoutDashboard } from "lucide-react";
 import { User, Group, CallLogItem, StatusItem } from "@/types";
 import { formatChatTime, getLastMessagePreviewWithIcon, type LastMessageIconType } from "@/lib/utils";
 import CallsList from "@/components/ui/CallsList";
@@ -70,6 +70,8 @@ interface Props {
   onOpenSettings: () => void;
   showSettings?: boolean;
   onCloseSettings?: () => void;
+  isAdmin?: boolean;
+  onOpenAdminDashboard?: () => void;
 }
 
 export default function Sidebar(props: Props) {
@@ -116,6 +118,8 @@ export default function Sidebar(props: Props) {
     onOpenSettings,
     showSettings,
     onCloseSettings,
+    isAdmin,
+    onOpenAdminDashboard,
   } = props;
 
   const sortedUsers = [...users]
@@ -182,6 +186,19 @@ export default function Sidebar(props: Props) {
           </span>
         </div>
         <div className="flex gap-4 text-gray-500">
+          {isAdmin && onOpenAdminDashboard && (
+            <button
+              className="hover:text-[#00a884]"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCloseSettings?.();
+                onOpenAdminDashboard();
+              }}
+              title="Admin dashboard"
+            >
+              <LayoutDashboard size={20} />
+            </button>
+          )}
           <button
             className="hover:text-gray-700"
             onClick={(e) => { e.stopPropagation(); if (showSettings) onCloseSettings?.(); else onOpenSettings(); }}

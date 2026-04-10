@@ -25,6 +25,13 @@ import {
 import { User as UserType, UserSettings } from "@/types";
 import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
+import {
+  CALL_RINGTONE_OPTIONS,
+  MESSAGE_TONE_OPTIONS,
+  normalizeToneId,
+  playToneById,
+  playVibrateToneSound,
+} from "@/lib/notificationSounds";
 
 type SettingsPage =
   | "main"
@@ -62,13 +69,13 @@ const defaultSettings: UserSettings = {
   },
   notifications: {
     messages_enabled: true,
-    message_tone: "default",
+    message_tone: "message_tune",
     message_vibrate: true,
     message_popup: true,
     group_enabled: true,
-    group_tone: "default",
+    group_tone: "message_tune",
     group_vibrate: true,
-    call_ringtone: "default",
+    call_ringtone: "message_tune",
     call_vibrate: true,
   },
   storage: {
@@ -134,6 +141,18 @@ export default function SettingsPanel({
       if (res.ok) {
         const next = await res.json();
         setSettings((prev) => ({ ...prev, ...next }));
+        if (
+          section === "notifications" &&
+          typeof window !== "undefined" &&
+          next.notifications &&
+          typeof next.notifications === "object"
+        ) {
+          window.dispatchEvent(
+            new CustomEvent("workchat-notifications-changed", {
+              detail: next.notifications as Record<string, unknown>,
+            }),
+          );
+        }
       }
     } catch (e) {
       console.error(e);
@@ -474,22 +493,57 @@ export default function SettingsPanel({
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="text-gray-900">Tone</span>
                   <select
-                    value={settings.notifications?.message_tone ?? "default"}
-                    onChange={(e) => updateSection("notifications", { message_tone: e.target.value })}
-                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white"
+                    value={normalizeToneId(settings.notifications?.message_tone)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (settings.notifications?.message_vibrate ?? true) {
+                        playVibrateToneSound(0.72);
+                      } else {
+                        playToneById(v, 0.72);
+                      }
+                      void updateSection("notifications", { message_tone: v });
+                    }}
+                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white max-w-[58%]"
                   >
-                    <option value="default">Default</option>
+                    {MESSAGE_TONE_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="text-gray-900">Vibrate</span>
                   <Toggle
                     checked={settings.notifications?.message_vibrate ?? true}
-                    onChange={(v) => updateSection("notifications", { message_vibrate: v })}
+                    onChange={(v) => {
+                      setSettings((prev) => ({
+                        ...prev,
+                        notifications: {
+                          ...defaultSettings.notifications,
+                          ...prev.notifications,
+                          message_vibrate: v,
+                        },
+                      }));
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(
+                          new CustomEvent("workchat-notifications-changed", {
+                            detail: { message_vibrate: v },
+                          }),
+                        );
+                      }
+                      if (v) playVibrateToneSound(0.75);
+                      void updateSection("notifications", { message_vibrate: v });
+                    }}
                   />
                 </div>
-                <div className="px-4 py-3 flex items-center justify-between">
-                  <span className="text-gray-900">Popup</span>
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-gray-900 block">Popup</span>
+                    <span className="text-[11px] text-gray-500 leading-snug">
+                      Alerts for DMs, groups & calls. Tab hidden: system notification. Tab open: in-app toast.
+                    </span>
+                  </div>
                   <Toggle
                     checked={settings.notifications?.message_popup ?? true}
                     onChange={(v) => updateSection("notifications", { message_popup: v })}
@@ -507,18 +561,48 @@ export default function SettingsPanel({
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="text-gray-900">Group tone</span>
                   <select
-                    value={settings.notifications?.group_tone ?? "default"}
-                    onChange={(e) => updateSection("notifications", { group_tone: e.target.value })}
-                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white"
+                    value={normalizeToneId(settings.notifications?.group_tone)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (settings.notifications?.group_vibrate ?? true) {
+                        playVibrateToneSound(0.72);
+                      } else {
+                        playToneById(v, 0.72);
+                      }
+                      void updateSection("notifications", { group_tone: v });
+                    }}
+                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white max-w-[58%]"
                   >
-                    <option value="default">Default</option>
+                    {MESSAGE_TONE_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="text-gray-900">Vibrate</span>
                   <Toggle
                     checked={settings.notifications?.group_vibrate ?? true}
-                    onChange={(v) => updateSection("notifications", { group_vibrate: v })}
+                    onChange={(v) => {
+                      setSettings((prev) => ({
+                        ...prev,
+                        notifications: {
+                          ...defaultSettings.notifications,
+                          ...prev.notifications,
+                          group_vibrate: v,
+                        },
+                      }));
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(
+                          new CustomEvent("workchat-notifications-changed", {
+                            detail: { group_vibrate: v },
+                          }),
+                        );
+                      }
+                      if (v) playVibrateToneSound(0.75);
+                      void updateSection("notifications", { group_vibrate: v });
+                    }}
                   />
                 </div>
               </Section>
@@ -526,11 +610,19 @@ export default function SettingsPanel({
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="text-gray-900">Ringtone</span>
                   <select
-                    value={settings.notifications?.call_ringtone ?? "default"}
-                    onChange={(e) => updateSection("notifications", { call_ringtone: e.target.value })}
-                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white"
+                    value={normalizeToneId(settings.notifications?.call_ringtone)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      playToneById(v, 0.72);
+                      void updateSection("notifications", { call_ringtone: v });
+                    }}
+                    className="text-sm border rounded px-2 py-1 text-[#00a884] border-[#00a884] bg-white max-w-[58%]"
                   >
-                    <option value="default">Default</option>
+                    {CALL_RINGTONE_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="px-4 py-3 flex items-center justify-between">

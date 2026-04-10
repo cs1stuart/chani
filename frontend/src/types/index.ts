@@ -1,3 +1,5 @@
+export type UserRole = "admin" | "employee";
+
 export interface User {
   id: string;
   username: string;
@@ -5,6 +7,7 @@ export interface User {
   about?: string;
   status?: "online" | "offline";
   last_seen?: string;
+  role?: UserRole;
 }
 
 export interface Group {
